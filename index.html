@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -132,12 +132,13 @@
     return raw.split(/\s*,\s*/);
   }
 
-  function formatDate(d) {
+  function formatDate(d, t) {
     if (!d) return '-';
     var parts = d.split('-');
     if (parts.length !== 3) return d;
-    var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-    return parts[2] + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+    var result = parts[2] + '/' + parts[1] + '/' + parts[0];
+    if (t) result += ' ' + t;
+    return result;
   }
 
   /* ---- data ---- */
@@ -146,6 +147,7 @@
   var telpToko   = get('telp_toko', '');
   var idTransaksi = get('id_transaksi', '-');
   var tanggal    = get('tanggal', '');
+  var waktu      = get('waktu', '');
   var total      = get('total', '0');
   var tunai      = get('tunai', '0');
   var kembali    = get('kembali', '0');
@@ -170,8 +172,7 @@
 
   /* Transaction info */
   html += '<div class="info">';
-  html += '  <div class="info-row"><span>No: ' + idTransaksi + '</span><span>Tanggal: ' + formatDate(tanggal) + '</span></div>';
-  html += '  <div class="info-row"><span>Kasir:</span><span>-</span></div>';
+  html += '  <div class="info-row"><span>No: ' + idTransaksi + '</span><span>Tanggal: ' + formatDate(tanggal, waktu) + '</span></div>';
   html += '</div>';
 
   html += '<hr class="divider">';
