@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -9,8 +9,9 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Arial', Arial, Helvetica, sans-serif, monospace;
-    font-size: 15px;
+    font-family: 'Arial', Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    line-height: 1.6;
     color: #000;
     background: #f4f4f4;
     display: flex;
@@ -21,63 +22,94 @@
   .receipt {
     width: 280px;
     background: #fff;
-    padding: 12px;
+    padding: 16px 14px;
     border: 1px dashed #ccc;
   }
 
   /* ---------- Header ---------- */
-  .header { text-align: center; margin-bottom: 6px; }
+  .header {
+    text-align: center;
+    padding-bottom: 12px;
+  }
   .header .shop-name {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 4px;
   }
-  .header .shop-address,
-  .header .shop-phone { font-size: 10px; line-height: 1.4; }
   .receipt-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
-    margin: 6px 0 0;
+    margin: 6px 0 2px;
   }
 
   /* ---------- Divider ---------- */
   .divider {
     border: none;
     border-top: 1px dashed #000;
-    margin: 6px 0;
+    margin: 10px 0;
   }
 
   /* ---------- Info ---------- */
-  .info { font-size: 11px; margin-bottom: 4px; }
-  .info-row { display: flex; justify-content: space-between; flex-wrap: wrap; }
-  .info-row span { display: inline-block; width: 48%; }
-
-  /* ---------- Table ---------- */
-  .items-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
-  .items-table th {
-    font-size: 11px;
-    text-align: left;
-    border-bottom: 1px dashed #000;
-    padding: 2px 0;
+  .info {
+    padding: 6px 0;
   }
-  .items-table th:nth-child(2),
-  .items-table th:nth-child(3),
-  .items-table th:nth-child(4) { text-align: right; }
-  .items-table td { font-size: 11px; padding: 2px 0; vertical-align: top; }
-  .items-table td:nth-child(2),
-  .items-table td:nth-child(3),
-  .items-table td:nth-child(4) { text-align: right; white-space: nowrap; }
-  .items-table .product-name { max-width: 120px; word-break: break-word; }
+  .info-row {
+    margin-bottom: 4px;
+  }
+
+  /* ---------- Items (vertical layout) ---------- */
+  .items-list {
+    padding: 4px 0;
+  }
+
+  .item-entry {
+    padding: 8px 0;
+    border-bottom: 1px dotted #ccc;
+  }
+  .item-entry:last-child {
+    border-bottom: none;
+  }
+
+  .item-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+
+  .item-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+
+  .item-subtotal {
+    text-align: right;
+    font-weight: bold;
+  }
 
   /* ---------- Totals ---------- */
-  .totals { font-size: 12px; margin-top: 4px; }
-  .totals .row { display: flex; justify-content: space-between; padding: 2px 0; }
-  .totals .row.grand { font-weight: bold; font-size: 13px; }
+  .totals {
+    padding: 8px 0;
+  }
+  .totals .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  .totals .row.grand {
+    font-weight: bold;
+    font-size: 13px;
+    padding: 8px 0 4px;
+  }
 
   /* ---------- Footer ---------- */
-  .footer { text-align: center; font-size: 10px; margin-top: 8px; }
-  .footer p { line-height: 1.4; }
+  .footer {
+    text-align: center;
+    padding-top: 10px;
+    line-height: 1.6;
+  }
 
   /* ---------- Print button ---------- */
   .no-print { text-align: center; margin-top: 12px; }
@@ -92,12 +124,34 @@
   }
   .no-print button:hover { background: #45a049; }
 
-  /* ---------- Print media ---------- */
+  /* ---------- Print media (58mm thermal) ---------- */
   @media print {
-    body { background: #fff; padding: 0; }
-    .receipt { border: none; width: 100%; padding: 0; }
+    @page {
+      size: 58mm auto;
+      margin: 2mm 3mm;
+    }
+
+    html, body {
+      width: 58mm;
+      background: #fff;
+      padding: 0;
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.6;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .receipt {
+      border: none;
+      width: 100%;
+      max-width: 52mm;
+      padding: 2mm 0;
+      margin: 0;
+    }
+
     .no-print { display: none !important; }
-    @page { margin: 4mm; }
+
+    .header .shop-name { font-size: 15px; }
   }
 </style>
 </head>
@@ -114,7 +168,6 @@
 
 <script>
 (function () {
-  /* ---- helpers ---- */
   var params = new URLSearchParams(window.location.search);
 
   function get(key, fallback) {
@@ -126,7 +179,6 @@
     return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 });
   }
 
-  /* AppSheet SELECT() returns comma-separated " , " lists */
   function splitList(raw) {
     if (!raw) return [];
     return raw.split(/\s*,\s*/);
@@ -142,20 +194,20 @@
   }
 
   /* ---- data ---- */
-  var namaToko   = get('nama_toko', 'Nama Toko');
-  var alamatToko = get('alamat_toko', '');
-  var telpToko   = get('telp_toko', '');
+  var namaToko    = get('nama_toko', 'Nama Toko');
+  var alamatToko  = get('alamat_toko', '');
+  var telpToko    = get('telp_toko', '');
   var idTransaksi = get('id_transaksi', '-');
-  var tanggal    = get('tanggal', '');
-  var waktu      = get('waktu', '');
-  var total      = get('total', '0');
-  var tunai      = get('tunai', '0');
-  var kembali    = get('kembali', '0');
+  var tanggal     = get('tanggal', '');
+  var waktu       = get('waktu', '');
+  var total       = get('total', '0');
+  var tunai       = get('tunai', '0');
+  var kembali     = get('kembali', '0');
 
-  var namaProduk = splitList(get('nama_produk'));
+  var namaProduk  = splitList(get('nama_produk'));
   var hargaProduk = splitList(get('harga_produk'));
-  var qty        = splitList(get('qty'));
-  var subTotal   = splitList(get('sub_total'));
+  var qty         = splitList(get('qty'));
+  var subTotal    = splitList(get('sub_total'));
 
   /* ---- build HTML ---- */
   var html = '';
@@ -164,38 +216,38 @@
   html += '<div class="header">';
   html += '  <div class="shop-name">' + namaToko + '</div>';
   html += '  <div class="receipt-title">Nota Penjualan</div>';
-  if (alamatToko) html += '  <div class="shop-address">' + alamatToko + '</div>';
-  if (telpToko)   html += '  <div class="shop-phone">Telp: ' + telpToko + '</div>';
+  if (alamatToko) html += '  <div>' + alamatToko + '</div>';
+  if (telpToko)   html += '  <div>Telp: ' + telpToko + '</div>';
   html += '</div>';
 
   html += '<hr class="divider">';
 
   /* Transaction info */
   html += '<div class="info">';
-  html += '  <div class="info-row"><span>No: ' + idTransaksi + '</span><span>Tanggal: ' + formatDate(tanggal, waktu) + '</span></div>';
+  html += '  <div class="info-row">No: ' + idTransaksi + '</div>';
+  html += '  <div class="info-row">Tanggal: ' + formatDate(tanggal, waktu) + '</div>';
   html += '</div>';
 
   html += '<hr class="divider">';
 
-  /* Items table */
-  html += '<table class="items-table">';
-  html += '<thead><tr><th>Item</th><th style="text-align:right;">Harga</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Subtotal</th></tr></thead>';
-  html += '<tbody>';
+  /* Items — vertical layout */
+  html += '<div class="items-list">';
 
   var count = Math.max(namaProduk.length, hargaProduk.length, qty.length, subTotal.length);
   if (count === 0) {
-    html += '<tr><td colspan="4" style="text-align:center;padding:8px 0;">Tidak ada item</td></tr>';
+    html += '<div style="text-align:center;padding:12px 0;">Tidak ada item</div>';
   }
   for (var i = 0; i < count; i++) {
-    html += '<tr>';
-    html += '  <td class="product-name">' + (namaProduk[i] || '-') + '</td>';
-    html += '  <td>' + rupiah(hargaProduk[i]) + '</td>';
-    html += '  <td>' + (qty[i] || '0') + '</td>';
-    html += '  <td>' + rupiah(subTotal[i]) + '</td>';
-    html += '</tr>';
+    html += '<div class="item-entry">';
+    html += '  <div class="item-name">' + (namaProduk[i] || '-') + '</div>';
+    html += '  <div class="item-detail">';
+    html += '    <span>' + (qty[i] || '0') + ' x ' + rupiah(hargaProduk[i]) + '</span>';
+    html += '  </div>';
+    html += '  <div class="item-subtotal">' + rupiah(subTotal[i]) + '</div>';
+    html += '</div>';
   }
 
-  html += '</tbody></table>';
+  html += '</div>';
 
   html += '<hr class="divider">';
 
@@ -211,7 +263,7 @@
   /* Footer */
   html += '<div class="footer">';
   html += '  <p>Terima kasih atas kunjungan Anda!</p>';
-  html += '  <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>';
+  html += '  <p style="margin-top:6px;">Barang yang sudah dibeli tidak dapat<br>ditukar / dikembalikan</p>';
   html += '</div>';
 
   document.getElementById('receipt').innerHTML = html;
