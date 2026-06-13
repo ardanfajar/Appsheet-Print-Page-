@@ -10,7 +10,7 @@
 
   body {
     font-family: 'Arial', Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.5;
     color: #000;
     background: #f4f4f4;
@@ -29,14 +29,12 @@
   /* ---------- Header ---------- */
   .header { text-align: center; padding-bottom: 8px; }
   .header .shop-name {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 4px;
   }
-  .header .shop-address { font-size: 11px; margin-bottom: 2px; }
-  .header .shop-phone   { font-size: 11px; }
 
   /* ---------- Divider ---------- */
   .divider {
@@ -46,8 +44,8 @@
   }
 
   /* ---------- Info ---------- */
-  .info { font-size: 11px; padding: 4px 0; }
-  .info-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+  .info { padding: 4px 0; }
+  .info-row { margin-bottom: 2px; }
 
   /* ---------- Items (vertical layout) ---------- */
   .items-list { padding: 4px 0; }
@@ -59,7 +57,6 @@
   .item-entry:last-child { border-bottom: none; }
 
   .item-name {
-    font-size: 12px;
     font-weight: bold;
     margin-bottom: 3px;
     word-break: break-word;
@@ -68,14 +65,11 @@
   .item-detail {
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
-    color: #333;
   }
 
   .item-subtotal {
     display: flex;
     justify-content: flex-end;
-    font-size: 12px;
     font-weight: bold;
     margin-top: 2px;
   }
@@ -85,19 +79,16 @@
   .totals .row {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
     padding: 3px 0;
   }
   .totals .row.grand {
     font-weight: bold;
-    font-size: 14px;
     padding: 6px 0 3px 0;
   }
 
   /* ---------- Footer ---------- */
   .footer {
     text-align: center;
-    font-size: 10px;
     padding-top: 6px;
     line-height: 1.6;
   }
@@ -127,7 +118,7 @@
       background: #fff;
       padding: 0;
       margin: 0;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.5;
       -webkit-print-color-adjust: exact;
     }
@@ -142,20 +133,7 @@
 
     .no-print { display: none !important; }
 
-    .header .shop-name { font-size: 16px; }
-    .header .shop-address,
-    .header .shop-phone { font-size: 12px; }
-
-    .info { font-size: 12px; }
-
-    .item-name { font-size: 12px; }
-    .item-detail { font-size: 11px; }
-    .item-subtotal { font-size: 12px; }
-
-    .totals .row { font-size: 12px; }
-    .totals .row.grand { font-size: 14px; }
-
-    .footer { font-size: 10px; }
+    .header .shop-name { font-size: 15px; }
   }
 </style>
 </head>
@@ -189,12 +167,17 @@
     return raw.split(/\s*,\s*/);
   }
 
-  function formatDate(d) {
+  function formatDateTime(d, t) {
     if (!d) return '-';
     var parts = d.split('-');
     if (parts.length !== 3) return d;
-    var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-    return parts[2] + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+    var months = ['Januari','Februari','Maret','April','Mei','Juni',
+                  'Juli','Agustus','September','Oktober','November','Desember'];
+    var result = parts[2] + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+    if (t) {
+      result += '  ' + t;
+    }
+    return result;
   }
 
   /* ---- data ---- */
@@ -203,6 +186,7 @@
   var telpToko    = get('telp_toko', '');
   var idTransaksi = get('id_transaksi', '-');
   var tanggal     = get('tanggal', '');
+  var waktu       = get('waktu', '');
   var total       = get('total', '0');
   var tunai       = get('tunai', '0');
   var kembali     = get('kembali', '0');
@@ -218,16 +202,16 @@
   /* Header */
   html += '<div class="header">';
   html += '  <div class="shop-name">' + namaToko + '</div>';
-  if (alamatToko) html += '  <div class="shop-address">' + alamatToko + '</div>';
-  if (telpToko)   html += '  <div class="shop-phone">Telp: ' + telpToko + '</div>';
+  if (alamatToko) html += '  <div>' + alamatToko + '</div>';
+  if (telpToko)   html += '  <div>Telp: ' + telpToko + '</div>';
   html += '</div>';
 
   html += '<hr class="divider">';
 
   /* Transaction info */
   html += '<div class="info">';
-  html += '  <div class="info-row"><span>No: ' + idTransaksi + '</span></div>';
-  html += '  <div class="info-row"><span>Tgl: ' + formatDate(tanggal) + '</span></div>';
+  html += '  <div class="info-row">No: ' + idTransaksi + '</div>';
+  html += '  <div class="info-row">Tanggal: ' + formatDateTime(tanggal, waktu) + '</div>';
   html += '</div>';
 
   html += '<hr class="divider">';
