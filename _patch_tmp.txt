@@ -1,0 +1,305 @@
+﻿*** Begin Patch
+*** Add File: D:\download\nota-ekis-family.html
++<!DOCTYPE html>
++<html lang="id">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Nota Penjualan</title>
++  <style>
++    @page {
++      size: 58mm auto;
++      margin: 0;
++    }
++
++    * {
++      margin: 0;
++      padding: 0;
++      box-sizing: border-box;
++    }
++
++    body {
++      font-family: 'Courier New', Courier, monospace;
++      font-size: 12px;
++      background: #f0f0f0;
++      display: flex;
++      justify-content: center;
++      padding: 20px 0;
++    }
++
++    .receipt {
++      width: 58mm;
++      background: #fff;
++      padding: 8px;
++      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
++    }
++
++    .header {
++      text-align: center;
++      padding-bottom: 6px;
++      border-bottom: 1px dashed #000;
++    }
++
++    .header .nama-toko {
++      font-size: 16px;
++      font-weight: bold;
++      text-transform: uppercase;
++    }
++
++    .header .alamat-toko,
++    .header .telp-toko {
++      font-size: 11px;
++    }
++
++    .info {
++      padding: 6px 0;
++      border-bottom: 1px dashed #000;
++      font-size: 11px;
++    }
++
++    .info-row {
++      display: flex;
++      justify-content: space-between;
++    }
++
++    .items {
++      padding: 6px 0;
++      border-bottom: 1px dashed #000;
++    }
++
++    .item {
++      margin-bottom: 4px;
++    }
++
++    .item .item-name {
++      font-weight: bold;
++      font-size: 11px;
++      word-wrap: break-word;
++    }
++
++    .item .item-detail {
++      display: flex;
++      justify-content: space-between;
++      font-size: 11px;
++      padding-left: 8px;
++    }
++
++    .totals {
++      padding: 6px 0;
++      border-bottom: 1px dashed #000;
++    }
++
++    .total-row {
++      display: flex;
++      justify-content: space-between;
++      font-size: 11px;
++    }
++
++    .total-row.grand {
++      font-weight: bold;
++      font-size: 13px;
++      margin-top: 2px;
++    }
++
++    .footer {
++      text-align: center;
++      padding-top: 6px;
++      font-size: 11px;
++    }
++
++    .footer .terima-kasih {
++      font-weight: bold;
++      margin-top: 4px;
++    }
++
++    .no-print {
++      text-align: center;
++      margin-top: 16px;
++    }
++
++    .no-print button {
++      padding: 10px 28px;
++      font-size: 14px;
++      cursor: pointer;
++      border: none;
++      background: #4CAF50;
++      color: #fff;
++      border-radius: 6px;
++      margin: 0 4px;
++    }
++
++    .no-print button:hover {
++      background: #388E3C;
++    }
++
++    .no-print button.secondary {
++      background: #757575;
++    }
++
++    .no-print button.secondary:hover {
++      background: #616161;
++    }
++
++    @media print {
++      body {
++        background: none;
++        padding: 0;
++      }
++
++      .receipt {
++        box-shadow: none;
++        width: 100%;
++      }
++
++      .no-print {
++        display: none !important;
++      }
++    }
++  </style>
++</head>
++<body>
++
++  <div>
++    <div class="receipt" id="receipt">
++      <div class="header">
++        <div class="nama-toko" id="nama_toko">-</div>
++        <div class="alamat-toko" id="alamat_toko">-</div>
++        <div class="telp-toko" id="telp_toko">-</div>
++      </div>
++
++      <div class="info">
++        <div class="info-row">
++          <span>No:</span>
++          <span id="id_transaksi">-</span>
++        </div>
++        <div class="info-row">
++          <span>Tanggal:</span>
++          <span id="tanggal">-</span>
++        </div>
++      </div>
++
++      <div class="items" id="items">
++        <!-- items akan diisi oleh JavaScript -->
++      </div>
++
++      <div class="totals">
++        <div class="total-row grand">
++          <span>TOTAL</span>
++          <span id="total">-</span>
++        </div>
++        <div class="total-row">
++          <span>Tunai</span>
++          <span id="tunai">-</span>
++        </div>
++        <div class="total-row">
++          <span>Kembali</span>
++          <span id="kembali">-</span>
++        </div>
++      </div>
++
++      <div class="footer">
++        <div class="terima-kasih">Terima Kasih</div>
++        <div>Barang yang sudah dibeli</div>
++        <div>tidak dapat ditukar/dikembalikan</div>
++      </div>
++    </div>
++
++    <div class="no-print">
++      <button onclick="window.print()">🖨️ Cetak Nota</button>
++      <button class="secondary" onclick="window.close()">✖ Tutup</button>
++    </div>
++  </div>
++
++  <script>
++    (function () {
++      var params = new URLSearchParams(window.location.search);
++
++      function get(key) {
++        return params.get(key) || '';
++      }
++
++      function formatRupiah(angka) {
++        if (!angka && angka !== 0) return '-';
++        var num = parseFloat(String(angka).replace(/[^0-9.\-]/g, ''));
++        if (isNaN(num)) return angka;
++        return 'Rp ' + num.toLocaleString('id-ID', {
++          minimumFractionDigits: 0,
++          maximumFractionDigits: 0
++        });
++      }
++
++      function formatTanggal(tgl) {
++        if (!tgl) return '-';
++        var parts = tgl.split('-');
++        if (parts.length === 3) {
++          return parts[2] + '/' + parts[1] + '/' + parts[0];
++        }
++        return tgl;
++      }
++
++      /* AppSheet SELECT() menghasilkan list yang dipisah ", " (koma spasi) */
++      function splitList(val) {
++        if (!val) return [];
++        return val.split(/\s*,\s*/);
++      }
++
++      /* --- Isi header --- */
++      document.getElementById('nama_toko').textContent = get('nama_toko') || '-';
++      document.getElementById('alamat_toko').textContent = get('alamat_toko') || '-';
++      document.getElementById('telp_toko').textContent = get('telp_toko') ? 'Telp: ' + get('telp_toko') : '';
++
++      /* --- Isi info transaksi --- */
++      document.getElementById('id_transaksi').textContent = get('id_transaksi') || '-';
++      document.getElementById('tanggal').textContent = formatTanggal(get('tanggal'));
++
++      /* --- Isi item detail --- */
++      var namaProduk = splitList(get('nama_produk'));
++      var hargaProduk = splitList(get('harga_produk'));
++      var qty = splitList(get('qty'));
++      var subTotal = splitList(get('sub_total'));
++
++      var itemsContainer = document.getElementById('items');
++      var maxLen = Math.max(namaProduk.length, hargaProduk.length, qty.length, subTotal.length);
++
++      if (maxLen === 0) {
++        itemsContainer.innerHTML = '<div style="text-align:center;font-size:11px;padding:4px 0;">Tidak ada item</div>';
++      } else {
++        for (var i = 0; i < maxLen; i++) {
++          var div = document.createElement('div');
++          div.className = 'item';
++
++          var nameDiv = document.createElement('div');
++          nameDiv.className = 'item-name';
++          nameDiv.textContent = namaProduk[i] || '-';
++          div.appendChild(nameDiv);
++
++          var detailDiv = document.createElement('div');
++          detailDiv.className = 'item-detail';
++
++          var qtyHarga = document.createElement('span');
++          var qtyVal = qty[i] || '0';
++          var hargaVal = hargaProduk[i] || '0';
++          qtyHarga.textContent = qtyVal + ' x ' + formatRupiah(hargaVal);
++          detailDiv.appendChild(qtyHarga);
++
++          var subTotalSpan = document.createElement('span');
++          subTotalSpan.textContent = formatRupiah(subTotal[i]);
++          detailDiv.appendChild(subTotalSpan);
++
++          div.appendChild(detailDiv);
++          itemsContainer.appendChild(div);
++        }
++      }
++
++      /* --- Isi total --- */
++      document.getElementById('total').textContent = formatRupiah(get('total'));
++      document.getElementById('tunai').textContent = formatRupiah(get('tunai'));
++      document.getElementById('kembali').textContent = formatRupiah(get('kembali'));
++
++      /* --- Set judul halaman --- */
++      document.title = 'Nota - ' + (get('id_transaksi') || 'Penjualan');
++    })();
++  </script>
++</body>
++</html>
+*** End Patch

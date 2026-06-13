@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nota Penjualan</title>
+<style>
+  /* ---------- Reset & Base ---------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: #000;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  .receipt {
+    width: 280px;
+    background: #fff;
+    padding: 12px;
+    border: 1px dashed #ccc;
+  }
+
+  /* ---------- Header ---------- */
+  .header { text-align: center; margin-bottom: 8px; }
+  .header .shop-name {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header .shop-address,
+  .header .shop-phone { font-size: 11px; }
+
+  /* ---------- Divider ---------- */
+  .divider {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
+
+  /* ---------- Info ---------- */
+  .info { font-size: 11px; margin-bottom: 2px; }
+  .info-row { display: flex; justify-content: space-between; }
+
+  /* ---------- Table ---------- */
+  .items-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  .items-table th {
+    font-size: 11px;
+    text-align: left;
+    border-bottom: 1px dashed #000;
+    padding: 2px 0;
+  }
+  .items-table th:nth-child(2),
+  .items-table th:nth-child(3),
+  .items-table th:nth-child(4) { text-align: right; }
+  .items-table td { font-size: 11px; padding: 2px 0; vertical-align: top; }
+  .items-table td:nth-child(2),
+  .items-table td:nth-child(3),
+  .items-table td:nth-child(4) { text-align: right; white-space: nowrap; }
+  .items-table .product-name { max-width: 110px; word-break: break-word; }
+
+  /* ---------- Totals ---------- */
+  .totals { font-size: 12px; }
+  .totals .row { display: flex; justify-content: space-between; padding: 1px 0; }
+  .totals .row.grand { font-weight: bold; font-size: 13px; }
+
+  /* ---------- Footer ---------- */
+  .footer { text-align: center; font-size: 10px; margin-top: 8px; }
+
+  /* ---------- Print button ---------- */
+  .no-print { text-align: center; margin-top: 12px; }
+  .no-print button {
+    padding: 8px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+  .no-print button:hover { background: #45a049; }
+
+  /* ---------- Print media ---------- */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .receipt { border: none; width: 100%; padding: 0; }
+    .no-print { display: none !important; }
+    @page { margin: 4mm; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="receipt" id="receipt">
+    <!-- filled by JS -->
+  </div>
+  <div class="no-print">
+    <button onclick="window.print()">🖨️ Cetak Nota</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ---- helpers ---- */
+  var params = new URLSearchParams(window.location.search);
+
+  function get(key, fallback) {
+    return params.get(key) || fallback || '';
+  }
+
+  function rupiah(n) {
+    var num = parseFloat(n) || 0;
+    return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 });
+  }
+
+  /* AppSheet SELECT() returns comma-separated " , " lists */
+  function splitList(raw) {
+    if (!raw) return [];
+    return raw.split(/\s*,\s*/);
+  }
+
+  function formatDate(d) {
+    if (!d) return '-';
+    var parts = d.split('-');
+    if (parts.length !== 3) return d;
+    var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    return parts[2] + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+  }
+
+  /* ---- data ---- */
+  var namaToko   = get('nama_toko', 'Nama Toko');
+  var alamatToko = get('alamat_toko', '');
+  var telpToko   = get('telp_toko', '');
+  var idTransaksi = get('id_transaksi', '-');
+  var tanggal    = get('tanggal', '');
+  var total      = get('total', '0');
+  var tunai      = get('tunai', '0');
+  var kembali    = get('kembali', '0');
+
+  var namaProduk = splitList(get('nama_produk'));
+  var hargaProduk = splitList(get('harga_produk'));
+  var qty        = splitList(get('qty'));
+  var subTotal   = splitList(get('sub_total'));
+
+  /* ---- build HTML ---- */
+  var html = '';
+
+  /* Header */
+  html += '<div class="header">';
+  html += '  <div class="shop-name">' + namaToko + '</div>';
+  if (alamatToko) html += '  <div class="shop-address">' + alamatToko + '</div>';
+  if (telpToko)   html += '  <div class="shop-phone">Telp: ' + telpToko + '</div>';
+  html += '</div>';
+
+  html += '<hr class="divider">';
+
+  /* Transaction info */
+  html += '<div class="info"><div class="info-row"><span>No: ' + idTransaksi + '</span><span>' + formatDate(tanggal) + '</span></div></div>';
+
+  html += '<hr class="divider">';
+
+  /* Items table */
+  html += '<table class="items-table">';
+  html += '<thead><tr><th>Item</th><th>Harga</th><th>Qty</th><th>Subtotal</th></tr></thead>';
+  html += '<tbody>';
+
+  var count = Math.max(namaProduk.length, hargaProduk.length, qty.length, subTotal.length);
+  if (count === 0) {
+    html += '<tr><td colspan="4" style="text-align:center;padding:8px 0;">Tidak ada item</td></tr>';
+  }
+  for (var i = 0; i < count; i++) {
+    html += '<tr>';
+    html += '  <td class="product-name">' + (namaProduk[i] || '-') + '</td>';
+    html += '  <td>' + rupiah(hargaProduk[i]) + '</td>';
+    html += '  <td>' + (qty[i] || '0') + '</td>';
+    html += '  <td>' + rupiah(subTotal[i]) + '</td>';
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+
+  html += '<hr class="divider">';
+
+  /* Totals */
+  html += '<div class="totals">';
+  html += '  <div class="row grand"><span>TOTAL</span><span>' + rupiah(total) + '</span></div>';
+  html += '  <div class="row"><span>Tunai</span><span>' + rupiah(tunai) + '</span></div>';
+  html += '  <div class="row"><span>Kembali</span><span>' + rupiah(kembali) + '</span></div>';
+  html += '</div>';
+
+  html += '<hr class="divider">';
+
+  /* Footer */
+  html += '<div class="footer">';
+  html += '  <p>Terima kasih atas kunjungan Anda!</p>';
+  html += '  <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>';
+  html += '</div>';
+
+  document.getElementById('receipt').innerHTML = html;
+})();
+</script>
+
+</body>
+</html>
