@@ -1,191 +1,210 @@
 ﻿<!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nota Transaksi Modern</title>
-    <style>
-        /* --- Unit 4: Best Practices & Reset CSS --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace; /* Font standar printer termal agar presisi */
-            font-size: 12px;
-            color: #333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nota Penjualan</title>
+<style>
+  /* ---------- Reset & Base ---------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Simulasi kertas struk termal (Lebar standar ~58mm hingga 80mm) */
-        body {
-            background-color: #f0f0f0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
+  body {
+    font-family: 'Arial', Arial, Helvetica, sans-serif, monospace;
+    font-size: 15px;
+    color: #000;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+  }
 
-        .receipt-card {
-            background: #fff;
-            width: 320px;
-            padding: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 4px;
-        }
+  .receipt {
+    width: 280px;
+    background: #fff;
+    padding: 12px;
+    border: 1px dashed #ccc;
+  }
 
-        /* --- Unit 1: User Interface Layouting --- */
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+  /* ---------- Header ---------- */
+  .header { text-align: center; margin-bottom: 8px; }
+  .header .shop-name {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header .shop-address,
+  .header .shop-phone { font-size: 11px; }
 
-        .store-name {
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
+  /* ---------- Divider ---------- */
+  .divider {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
 
-        .store-info {
-            font-size: 11px;
-            color: #666;
-            line-height: 1.4;
-        }
+  /* ---------- Info ---------- */
+  .info { font-size: 11px; margin-bottom: 2px; }
+  .info-row { display: flex; justify-content: space-between; }
 
-        /* Pembatas Modern (Menggantikan baris dash "-------" manual) */
-        .divider {
-            border-top: 1px dashed #bbb;
-            margin: 12px 0;
-        }
+  /* ---------- Table ---------- */
+  .items-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  .items-table th {
+    font-size: 11px;
+    text-align: left;
+    border-bottom: 1px dashed #000;
+    padding: 2px 0;
+  }
+  .items-table th:nth-child(2),
+  .items-table th:nth-child(3),
+  .items-table th:nth-child(4) { text-align: right; }
+  .items-table td { font-size: 11px; padding: 2px 0; vertical-align: top; }
+  .items-table td:nth-child(2),
+  .items-table td:nth-child(3),
+  .items-table td:nth-child(4) { text-align: right; white-space: nowrap; }
+  .items-table .product-name { max-width: 110px; word-break: break-word; }
 
-        .meta-info {
-            font-size: 11px;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-        }
+  /* ---------- Totals ---------- */
+  .totals { font-size: 12px; }
+  .totals .row { display: flex; justify-content: space-between; padding: 1px 0; }
+  .totals .row.grand { font-weight: bold; font-size: 13px; }
 
-        .meta-label { color: #777; }
-        .meta-value { font-weight: bold; }
+  /* ---------- Footer ---------- */
+  .footer { text-align: center; font-size: 10px; margin-top: 8px; }
 
-        /* Bagian Item Produk */
-        .item-list {
-            margin: 10px 0;
-        }
+  /* ---------- Print button ---------- */
+  .no-print { text-align: center; margin-top: 12px; }
+  .no-print button {
+    padding: 8px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+  .no-print button:hover { background: #45a049; }
 
-        .item-row {
-            margin-bottom: 10px;
-        }
-
-        .item-name {
-            font-weight: bold;
-            font-size: 12px;
-            margin-bottom: 2px;
-        }
-
-        .item-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #555;
-        }
-
-        /* Bagian Kalkulasi Total */
-        .totals-section {
-            margin-top: 10px;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .total-row.grand-total {
-            font-size: 14px;
-            font-weight: bold;
-            border-top: 1px solid #333;
-            border-bottom: 1px solid #333;
-            padding: 6px 0;
-            margin-top: 8px;
-        }
-
-        /* Bagian Footer Nota */
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 10px;
-            color: #777;
-            line-height: 1.5;
-        }
-
-        /* Aturan khusus saat dicetak ke printer fisik */
-        @media print {
-            body { background: none; padding: 0; }
-            .receipt-card { box-shadow: none; width: 100%; padding: 5px; }
-        }
-    </style>
+  /* ---------- Print media ---------- */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .receipt { border: none; width: 100%; padding: 0; }
+    .no-print { display: none !important; }
+    @page { margin: 4mm; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="receipt-card">
-        <!-- Header Toko -->
-        <div class="header">
-            <div class="store-name" id="storeName">SRI TURAH JAYA 2</div>
-            <div class="store-info" id="storeAddress">Tegal, Jawa Tengah</div>
-            <div class="store-info" id="storePhone">Telp: 081911566099</div>
-        </div>
+<div id="app">
+  <div class="receipt" id="receipt">
+    <!-- filled by JS -->
+  </div>
+  <div class="no-print">
+    <button onclick="window.print()">🖨️ Cetak Nota</button>
+  </div>
+</div>
 
-        <div class="divider"></div>
+<script>
+(function () {
+  /* ---- helpers ---- */
+  var params = new URLSearchParams(window.location.search);
 
-        <!-- Meta Data Transaksi -->
-        <div class="meta-info">
-            <span class="meta-label">No. Nota:</span>
-            <span class="meta-value" id="trxId">c5a5c8ad</span>
-        </div>
-        <div class="meta-info">
-            <span class="meta-label">Tanggal:</span>
-            <span class="meta-value" id="trxDate">25 Mei 2026</span>
-        </div>
+  function get(key, fallback) {
+    return params.get(key) || fallback || '';
+  }
 
-        <div class="divider"></div>
+  function rupiah(n) {
+    var num = parseFloat(n) || 0;
+    return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 });
+  }
 
-        <!-- Daftar Belanja (Unit 2 & 5: Akan di-render secara dinamis lewat JS) -->
-        <div class="item-list" id="itemList">
-            <div class="item-row">
-                <div class="item-name">Ikan Manyung</div>
-                <div class="item-details">
-                    <span>3 x Rp 20.000</span>
-                    <span class="item-subtotal">Rp 60.000</span>
-                </div>
-            </div>
-        </div>
+  /* AppSheet SELECT() returns comma-separated " , " lists */
+  function splitList(raw) {
+    if (!raw) return [];
+    return raw.split(/\s*,\s*/);
+  }
 
-        <div class="divider"></div>
+  function formatDate(d) {
+    if (!d) return '-';
+    var parts = d.split('-');
+    if (parts.length !== 3) return d;
+    var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    return parts[2] + ' ' + months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+  }
 
-        <!-- Rincian Pembayaran -->
-        <div class="totals-section">
-            <div class="total-row grand-total">
-                <span>TOTAL</span>
-                <span id="grandTotal">Rp 60.000</span>
-            </div>
-            <div class="total-row" style="margin-top: 8px;">
-                <span>Tunai</span>
-                <span id="cashAmount">Rp 100.000</span>
-            </div>
-            <div class="total-row">
-                <span>Kembali</span>
-                <span id="changeAmount">Rp 40.000</span>
-            </div>
-        </div>
+  /* ---- data ---- */
+  var namaToko   = get('nama_toko', 'Nama Toko');
+  var alamatToko = get('alamat_toko', '');
+  var telpToko   = get('telp_toko', '');
+  var idTransaksi = get('id_transaksi', '-');
+  var tanggal    = get('tanggal', '');
+  var total      = get('total', '0');
+  var tunai      = get('tunai', '0');
+  var kembali    = get('kembali', '0');
 
-        <div class="divider"></div>
+  var namaProduk = splitList(get('nama_produk'));
+  var hargaProduk = splitList(get('harga_produk'));
+  var qty        = splitList(get('qty'));
+  var subTotal   = splitList(get('sub_total'));
 
-        <!-- Catatan Kaki (Footer) -->
-        <div class="footer">
-            <p>Terima kasih atas kunjungan Anda!</p>
-            <p style="margin-top: 5px; font-style: italic;">Barang yang sudah dibeli tidak dapat ditukar / dikembalikan.</p>
-        </div>
-    </div>
+  /* ---- build HTML ---- */
+  var html = '';
+
+  /* Header */
+  html += '<div class="header">';
+  html += '  <div class="shop-name">' + namaToko + '</div>';
+  if (alamatToko) html += '  <div class="shop-address">' + alamatToko + '</div>';
+  if (telpToko)   html += '  <div class="shop-phone">Telp: ' + telpToko + '</div>';
+  html += '</div>';
+
+  html += '<hr class="divider">';
+
+  /* Transaction info */
+  html += '<div class="info"><div class="info-row"><span>No: ' + idTransaksi + '</span><span>' + formatDate(tanggal) + '</span></div></div>';
+
+  html += '<hr class="divider">';
+
+  /* Items table */
+  html += '<table class="items-table">';
+  html += '<thead><tr><th>Item</th><th>Harga</th><th>Qty</th><th>Subtotal</th></tr></thead>';
+  html += '<tbody>';
+
+  var count = Math.max(namaProduk.length, hargaProduk.length, qty.length, subTotal.length);
+  if (count === 0) {
+    html += '<tr><td colspan="4" style="text-align:center;padding:8px 0;">Tidak ada item</td></tr>';
+  }
+  for (var i = 0; i < count; i++) {
+    html += '<tr>';
+    html += '  <td class="product-name">' + (namaProduk[i] || '-') + '</td>';
+    html += '  <td>' + rupiah(hargaProduk[i]) + '</td>';
+    html += '  <td>' + (qty[i] || '0') + '</td>';
+    html += '  <td>' + rupiah(subTotal[i]) + '</td>';
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+
+  html += '<hr class="divider">';
+
+  /* Totals */
+  html += '<div class="totals">';
+  html += '  <div class="row grand"><span>TOTAL</span><span>' + rupiah(total) + '</span></div>';
+  html += '  <div class="row"><span>Tunai</span><span>' + rupiah(tunai) + '</span></div>';
+  html += '  <div class="row"><span>Kembali</span><span>' + rupiah(kembali) + '</span></div>';
+  html += '</div>';
+
+  html += '<hr class="divider">';
+
+  /* Footer */
+  html += '<div class="footer">';
+  html += '  <p>Terima kasih atas kunjungan Anda!</p>';
+  html += '  <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan</p>';
+  html += '</div>';
+
+  document.getElementById('receipt').innerHTML = html;
+})();
+</script>
 
 </body>
 </html>
